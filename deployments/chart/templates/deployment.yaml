@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "godview-starter.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "godview-starter.name" . }}
+    helm.sh/chart: {{ include "godview-starter.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "godview-starter.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /metrics
+        prometheus.io/port: "80"
+        updatedAt: {{ now | quote }}
+      labels:
+        app.kubernetes.io/name: {{ include "godview-starter.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          env:
+            - name: NAME
+              value: {{ .Chart.Name }}
+            - name: APP_ENV
+              value: {{ .Values.app.app_env }}
+            - name: PORT
+              value: {{ .Values.app.port | quote }}
+            {{- range $env := .Values.app.commonEnv }}
+            - name: {{ $env | upper }}
+              valueFrom:
+                secretKeyRef:
+                  name: cast-common
+                  key: {{ $env }}
+            {{- end }}
+            {{- range $env := .Values.app.env }}
+            - name: {{ $env | upper }}
+              valueFrom:
+                secretKeyRef:
+                  name: godview-starter
+                  key: {{ $env }}
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

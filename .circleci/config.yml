@@ -1,0 +1,77 @@
+version: 2.1
+jobs:
+  test:
+    working_directory: ~/app
+    docker:
+      - image: circleci/golang:1.14
+      - image: redis
+      - image: circleci/postgres:12
+        environment:
+          POSTGRES_USER: godview_starter
+          POSTGRES_PASSWORD: testpassword
+          POSTGRES_DB: castdb
+    environment:
+      APP_ENV: test
+      NAME: godview-starter
+      PORT: "3008"
+      SCHEME: Cast
+      SECRET: our-own-special-secret-for-sec
+      SESSION_TIMEOUT: 24h
+      HEADLESS_TIMEOUT: 30s
+      REDIS_HOST: localhost
+      REDIS_PORT: "6379"
+      POSTGRES_HOST: localhost
+      POSTGRES_DATABASE: castdb
+      PGDATABASE: castdb
+      POSTGRES_PORT: "5432"
+      POSTGRES_USER: godview_starter
+      PGUSER: godview_starter
+      POSTGRES_PASSWORD: testpassword
+      PGPASSWORD: testpassword
+      POSTGRES_SECURE_MODE: "false"
+      POSTGRES_MIGRATION_DIR: /home/circleci/app/sql
+      MAILER_KEY: my-mailer-key
+      MAIL_SENDER: Tsaron Tech
+      MAIL_SENDER_EMAIL: notify@tsaron.com
+      TEMPLATE_DIR: /home/circleci/app/templates
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - pkg-cache
+      - run:
+          name: Run tests
+          command: make test
+      - save_cache: # Store cache in the /go/pkg directory
+          key: pkg-cache
+          paths:
+            - vendors
+  deploy:
+    working_directory: ~/app
+    docker:
+      - image: tsaron/helm
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: false
+      - run:
+          name: Build and push docker image
+          command: make push && make deploy
+workflows:
+  version: 2
+  test-deploy:
+    jobs:
+      - test:
+          context: cast
+          filters:
+            branches:
+              ignore:
+                - staging
+                - master
+      - deploy:
+          context: cast
+          filters:
+            branches:
+              only:
+                - staging
+                - master
