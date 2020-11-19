@@ -130,5 +130,5 @@ func main() {
 		log.Err(err).Msg("could not start the server")
 	}
 
-	ctx.Done()
+	<-ctx.Done()
 }
