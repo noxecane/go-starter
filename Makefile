@@ -57,7 +57,7 @@ test:
 deploy: export KUBECONFIG = ./kubeconfig
 deploy: kube-config
 	@echo "Installing application in K8s cluster"
-	@helm upgrade ${CIRCLE_PROJECT_REPONAME} ./deployments/chart --install --debug ${HELM_ARGS} --namespace ${APP_ENV}
+	@helm upgrade ${CIRCLE_PROJECT_REPONAME} ./deployments/chart --install --debug --history-max 3 ${HELM_ARGS} --namespace ${APP_ENV}
 
 # Clean deployment resources
 .PHONY: clean
