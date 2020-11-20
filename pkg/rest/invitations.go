@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/go-chi/chi"
-	"github.com/go-ozzo/ozzo-validation/is"
 	ozzo "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/go-ozzo/ozzo-validation/v4/is"
 	"github.com/tsaron/anansi"
 	"tsaron.com/godview-starter/pkg/config"
 	"tsaron.com/godview-starter/pkg/invitations"
