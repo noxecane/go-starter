@@ -29,8 +29,8 @@ var (
 )
 
 type InvitationDTO struct {
-	EmailAddress string `json:"email_address"`
-	Role         string `json:"role"`
+	EmailAddress string `json:"email_address" mod:"smalltext"`
+	Role         string `json:"role" mod:"smalltext"`
 }
 
 func (t *InvitationDTO) Validate() error {
@@ -41,11 +41,11 @@ func (t *InvitationDTO) Validate() error {
 }
 
 type RegistrationDTO struct {
-	CompanyName string `json:"company_name"`
-	FirstName   string `json:"first_name"`
-	LastName    string `json:"last_name"`
-	Password    string `json:"password"`
-	PhoneNumber string `json:"phone_number"`
+	CompanyName string `json:"company_name" mod:"trim"`
+	FirstName   string `json:"first_name" mod:"trim"`
+	LastName    string `json:"last_name" mod:"trim"`
+	Password    string `json:"password" mod:"trim"`
+	PhoneNumber string `json:"phone_number" mod:"trim"`
 }
 
 func (t *RegistrationDTO) Validate() error {
