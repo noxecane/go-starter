@@ -9,8 +9,7 @@ COPY go.mod go.sum ./
 
 ENV GOOS=linux
 
-RUN go mod download
-RUN go mod verify
+RUN go mod download & go mod verify
 
 COPY . .
 

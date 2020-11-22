@@ -38,12 +38,12 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - pkg-cache
+            - go-mod-v4-{{ checksum "go.sum" }}
       - run:
           name: Run tests
           command: make test
       - save_cache: # Store cache in the /go/pkg directory
-          key: pkg-cache
+          key: go-mod-v4-{{ checksum "go.sum" }}
           paths:
             - vendors
   deploy:
